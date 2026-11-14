@@ -123,7 +123,8 @@ body.night .util{background:#0a0d16}
 .tshade{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle 80px at var(--x,-300px) var(--y,-300px),rgba(255,190,110,.12) 0,rgba(0,0,0,.2) 55px,rgba(0,0,0,.97) 100px)}
 .ttip{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:12px;color:#6b5a48;pointer-events:none;transition:opacity .6s}
 .tbtn{font:inherit;font-size:13px;background:#2a1d14;color:#efe5d5;border:1px solid #6b4a30;padding:8px 10px;cursor:pointer;width:100%}
-.blood{color:#9b1c1c;font-family:"Noto Serif JP",serif;letter-spacing:.3em;text-shadow:0 0 6px rgba(155,28,28,.5)}
+.blood{color:#9a8f80;font-family:"Noto Serif JP",serif;letter-spacing:.2em}
+.pencil{color:#7d7366;font-size:12px;letter-spacing:.15em;font-family:"Noto Serif JP",serif}
 .pview{margin-top:14px;border:1px solid #4a3a2a;padding:12px;background:#0e0a07}
 .zoomwrap{position:relative;width:100%;aspect-ratio:460/300;overflow:hidden;background:#000;touch-action:none;cursor:grab}
 .zoomin{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:0 0}
@@ -168,7 +169,7 @@ body.past{--main:#3a2416;--main2:#c08a5a;--sky:#160f0a;--ink:#d8c9b4;--muted:#8a
 body.past .ph img{filter:sepia(1) brightness(.5) contrast(1.2)}
 body.past .logo{animation:flick 5s infinite}
 @keyframes flick{0%,92%,100%{opacity:1}93%{opacity:.25}95%{opacity:1}97%{opacity:.4}}
-.glitch{animation:gl 4s infinite;display:inline-block}
+.glitch{display:inline}
 @keyframes gl{0%,95%,100%{transform:none}96%{transform:translateX(3px) skewX(8deg)}97%{transform:translateX(-3px)}}
 .smoke{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 120%,rgba(160,60,20,var(--f,0)) 0,transparent 60%)}
 #end{position:fixed;inset:0;background:#000;color:#e2d8c8;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;font-family:"Noto Serif JP",serif;text-align:center;overflow-y:auto}
@@ -240,10 +241,10 @@ function apply(){
     : S.stage>=3?"帳場の灯りは、消さずにおきます"
     : isNight()?"夜の月下荘へ、ようこそ"
     : "紅葉が見ごろを迎えております　｜　年末年始のご予約を承っております";
-  document.getElementById("utilR").textContent=S.name&&!inPast()?`${esc(S.name)} 様`:"";
+  document.getElementById("utilR").textContent=S.name&&!inPast()?`${esc(S.name)} 様${S.stage>=3&&S.stage<9?"　ほか1名":""}`:"";
   document.getElementById("logoText").textContent= inPast()?"月下荘　昭和六十一年":"月下荘";
   const w=document.getElementById("welcome");
-  w.innerHTML= S.res&&!inPast()&&(location.hash||"#top").match(/^#top$/)?`<div class="welcome">${esc(nm())}様　${after(4)?"――ようやく、お会いできますね。":"ご予約ありがとうございます。当日は、灯りを目印にお越しくださいませ。"}</div>`:"";
+  w.innerHTML= S.res&&!inPast()&&(location.hash||"#top").match(/^#top$/)?`<div class="welcome">${esc(nm())}様　${after(4)?"――ようやく、お会いできますね。":S.stage>=3&&S.stage<9?(()=>{const d=new Date();return `ただいま${d.getHours()}時${d.getMinutes()}分。${d.getHours()>=21||d.getHours()<5?"こんなお時間まで、起きていらっしゃるのですね。":"お連れ様と、ご一緒にお越しくださいませ。"}`})():"ご予約ありがとうございます。当日は、灯りを目印にお越しくださいませ。"}</div>`:"";
 }
 mq.addEventListener?mq.addEventListener("change",()=>{apply();route()}):mq.addListener(()=>{apply();route()});
 
@@ -287,7 +288,7 @@ const newsList=max=>`<ul class="news">${newsItems().slice(0,max||99).map(x=>`<li
 
 /* ================= 表のページ ================= */
 function vTop(){
-  return `<div class="hero">${ph(isNight()?"night":"hero")}<div class="cover"></div>${S.stage>=3&&S.stage<9||after(1)||after(5)?`<svg class="sil" viewBox="0 0 40 100" style="--s:${Math.min(5,S.visits||1)}"><ellipse cx="20" cy="14" rx="8" ry="10" fill="#000"/><path d="M6 100 L10 30 Q20 22 30 30 L34 100z" fill="#000"/><path d="M12 12 Q20 -2 28 12 L28 26 Q20 20 12 26z" fill="#000"/></svg>`:""}<div class="copy">${after(4)?"灯りを、ありがとう。":isNight()?"夜の湯宿に、灯りひとつ。":"山の音を、聴きにくる。"}<small>山あいの湯宿　月下荘</small></div></div>
+  return `<div class="hero">${ph(isNight()?"night":"hero")}<div class="cover"></div><div class="copy">${after(4)?"灯りを、ありがとう。":isNight()?"夜の湯宿に、灯りひとつ。":"山の音を、聴きにくる。"}<small>山あいの湯宿　月下荘</small></div></div>
   <section><div class="inner"><div class="concept">大正十五年、湯ノ沢のほとりに一軒の湯宿が生まれました。<br>十二の客室には、十二の月の名を。<br>${isNight()?"夜が更けると、月下荘は少しだけ違う顔を見せます。":"季節がめぐるように、またお越しいただけますように。"}</div></div></section>
   <section class="alt"><div class="inner">${sh("STAY","滞在のご案内")}<div class="cards">
    <a class="card" href="#rooms">${ph("room")}<div class="meta">ROOMS</div><h3>十二の客室</h3><p>睦月から師走まで。月の名を冠した、すべて趣の異なる和室です。</p></a>
@@ -336,18 +337,18 @@ function histItems(){
 }
 function vHistory(){
   return head("HISTORY","月下荘の歩み")+`<section style="padding-top:20px"><div class="inner" style="max-width:860px">
-  <div class="clockbox"><div style="${isNight()?"transform:scaleX(-1)":""}">${clockSVG("hc").replace("<svg ",'<svg class="liveclock" ')}</div><div><b class="serif" style="font-size:16px;letter-spacing:.15em">${isNight()?"帳場の鏡に映った柱時計":"帳場の柱時計"}</b><p style="font-size:14px;margin-top:6px">創業の年から、帳場で時を刻み続けている柱時計です。改装のときも、この時計だけは残しました。${isNight()?"<br><span class='glitch' style='color:var(--accent)'>……動いて、いない。</span>":""}</p></div></div>
+  <div class="clockbox"><div style="${isNight()?"transform:scaleX(-1)":""}">${clockSVG("hc").replace("<svg ",'<svg class="liveclock" ')}</div><div><b class="serif" style="font-size:16px;letter-spacing:.15em">${isNight()?"帳場の鏡に映った柱時計":"帳場の柱時計"}</b><p style="font-size:14px;margin-top:6px">創業の年から、帳場で時を刻み続けている柱時計です。改装のときも、この時計だけは残しました。${isNight()?"<br><span style='color:var(--muted)'>……秒針が、ない。</span>":""}</p></div></div>
   <ul class="hist">${histItems().map(x=>`<li><time>${x[0]}</time><span>${x[1]}</span></li>`).join("")}</ul></div></section>`;
 }
 const POSTS=[
  ["2026.10.30","蔵の話","子どものころ、裏の蔵でよくかくれんぼをしていました。祖母が言うには、昔は蔵の奥に、沢へ抜ける小さな戸があったそうです。わたしは一度も見つけられませんでしたけれど。"],
  ["2026.10.18","夜の館内図","祖母はよく「夜の館内図は、暗くして見なさい」と言っていました。昼と夜とで、宿の形が変わるとでもいうように。祖母の言うことは、ときどき、よくわかりません。"],
  ["2026.10.04","柱時計","帳場の柱時計は、昼間はちゃんと動いているのに、夜中にふと見ると、いつも同じ時刻で止まって見えるのです。目の錯覚、なのでしょうね。"],
- ["2026.09.21","毎年のご予約","毎年この時期に、インターネットでご予約くださるお客さまがいらっしゃいます。不思議なことに、当日お越しになったことは一度もありません。それでも祖母の言いつけで、その晩は、帳場の灯りを消さずにおきます。"],
- ["2026.09.02","手のぬくもり","火事の夜の夢を、今でもときどき見ます。煙の中で、誰かに手を引かれる夢です。顔は思い出せないのに、手のぬくもりだけは、はっきり覚えています。"],
+ ["2026.09.21","毎年のご予約","毎年この時期に、インターネットでご予約くださるお客さま{A}がいらっしゃいます。不思議なことに、当日お越しになったことは一度もありません。それでも祖母の言いつけで、その晩は、帳場の灯りを消さずにおきます。"],
+ ["2026.09.02","手のぬくもり","火事の夜の夢を、今でもときどき見ます。煙の中で、誰かに手を引かれる夢です。顔は思い出せないのに、手のぬくもりだけは、はっきり覚えています。{B}"],
 ];
 function vBlog(){
-  const ps=[...POSTS];
+  const ps=POSTS.map(p=>[p[0],p[1],p[2].replace("{A}",S.stage>=3?"――"+esc(nm())+"様――":"").replace("{B}",S.stage>=4&&!after(4)?"<br>それと、その人の名前も。たしか、"+esc(nm())+"、と。":"")]);
   if(S.stage>=3&&S.stage<9) ps.unshift(["1986.11.??",'<span class="glitch">わたしを　みつけて</span>',"くらは　くらい　けむい　こわい<br>だれか　わたしの　ほんとうの　なまえを　よんで"]);
   if(after(4)) ps.unshift([`2026.${pad(now.getMonth()+1)}.${pad(now.getDate())}`,"毎年ご予約くださるお客さまへ",`${esc(nm())}様。あの夜、蔵で泣いていたわたしの手を引いてくださったのは、あなたでしたね。<br>四十年かかって、ようやくお礼が言えます。わたしの名前は、鈴（すず）。あの夜の仲居見習いです。<br>今夜、帳場の灯りを消します。どうか、ゆっくりお休みくださいませ。`]);
   return head("JOURNAL","女将のひとりごと")+`<section style="padding-top:20px"><div class="inner" style="max-width:760px">${ps.map(p=>`<div class="post"><time>${p[0]}</time><h3>${p[1]}</h3><p>${p[2]}</p><div class="by">${after(4)?"四代目女将　鈴":"四代目女将"}</div></div>`).join("")}</div></section>`;
@@ -358,10 +359,10 @@ function vReserve(){
   for(let i=0;i<d0.getDay();i++) cal+="<div style='border:none'></div>";
   const days=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
   for(let d=1;d<=days;d++){const t=d===now.getDate();cal+=`<div class="${t?"ok":"full"}">${d}<br>${t?"残1":"×"}</div>`}
-  const form= S.res?`<div class="done"><p>ご予約を承りました。</p><div class="no">No. ${S.res}</div><p style="font-size:14px;margin-top:10px">${esc(nm())} 様　${MD} ご一泊<br>お部屋：<b>閏の間</b><br><span style="font-size:12px;color:var(--muted)">当日は、灯りを目印にお越しくださいませ。</span></p></div>`
+  const form= S.res?`<div class="done"><p>ご予約を承りました。</p><div class="no">No. ${S.res}</div><p style="font-size:14px;margin-top:10px">${esc(nm())} 様　${MD} ご一泊<br>お部屋：<b>閏の間</b>　${S.stage>=3&&S.stage<9?"2名様<br><span style='font-size:12px;color:var(--muted)'>（お連れ様のお名前は、すでに伺っております）</span>":"1名様"}<br><span style="font-size:12px;color:var(--muted)">当日は、灯りを目印にお越しくださいませ。</span></p></div>`
    :`<form class="form" id="rf"><div><label>ご宿泊日</label><input value="${now.getFullYear()}年${MD}（1泊）" readonly></div>
    <div><label>お名前（ひらがな）</label><input id="rname" placeholder="例）つきみ はなこ" autocomplete="off" required></div>
-   <div><label>ご人数</label><select><option>1名</option><option>2名</option></select></div>
+   <div><label>ご人数</label><select id="rnum"><option>1名</option><option${S.stage>=3&&S.stage<9?" selected":""}>2名</option></select></div>
    <div><label>お部屋</label><select>${ROOMS.map(r=>`<option>${r[1]}の間</option>`).join("")}</select></div>
    <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)">予約内容を確定する</button>
    <p class="note">※ 本フォームでは、お支払い情報はお伺いいたしません。お支払いは当日、帳場にて承ります。</p></form>`;
@@ -445,8 +446,8 @@ function vUruu(){
    <div class="it" data-lit style="left:6%;top:4%;width:46%"><div class="poem" id="poem">${POEM}</div></div>
    <div class="it" data-lit style="right:5%;top:8%;width:40%;font-size:13px">紙片：「この歌を<b>写しとって</b>、呼び鈴に聞かせてください」</div>
    <div class="it" data-lit style="right:6%;top:36%;width:40%"><button id="photoBtn" class="tbtn">古い写真を手にとる</button></div>
-   <div class="it blood" data-lit style="left:10%;top:76%;font-size:20px">み つ け て</div>
-   <div class="it" data-lit style="right:8%;top:72%;width:38%;font-size:12px;color:#9a8a76">焦げた畳に、小さな足あと。<br>渡り廊下のほうへ続いている。</div>`;
+   <div class="it pencil" data-lit style="left:8%;top:78%;width:40%">柱に、子どもの背丈で鉛筆の線。<br>「すず　十さい」<br>その少し上に、新しい線。<br>日付は、今日。</div>
+   <div class="it" data-lit style="right:8%;top:72%;width:38%;font-size:12px;color:#9a8a76">${["焦げた畳に、小さな足あと。<br>渡り廊下のほうへ、続いている。","小さな足あと。<br>……さっきより、こちらに近い。","小さな足あと。<br>あなたの立っている場所で、途切れている。"][Math.min(2,S.fp||0)]}</div>`;
   return `<section style="padding:30px 0"><div class="inner" style="max-width:720px"><div class="dark"><div class="warn">ROOM XIII</div><h2>閏の間</h2>
    <p>中は真っ暗だった。手さぐりで、灯りの入った手燭をつかむ。</p>
    ${darkRoom("uroom",items,560)}
@@ -457,24 +458,31 @@ function vUruu(){
 document.addEventListener("copy",e=>{
   const sel=getSelection();if(!sel||!sel.rangeCount)return;
   const p=document.getElementById("poem");
-  if(p&&p.contains(sel.anchorNode)&&e.clipboardData){e.clipboardData.setData("text/plain",SECRET);e.preventDefault()}
+  if(p&&p.contains(sel.anchorNode)&&e.clipboardData){e.clipboardData.setData("text/plain",SECRET);e.preventDefault();return}
+  const t=sel.toString();
+  if(t&&e.clipboardData&&S.stage>=3&&S.stage<9){e.clipboardData.setData("text/plain",t+"\n\n――いま、どなたと一緒にご覧になっていますか。");e.preventDefault()}
 });
-/* 古い写真（ピンチで拡大） */
+/* 古い写真（ピンチで拡大）：写っているのは六人。名前は五人分。開くたびに、六人目が前へ */
+function extraFig(){
+  const k=Math.min(4,S.photoN||0);
+  const x=[355,372,392,410,430][k],y=[78,104,132,156,176][k],sc=[.45,.6,.75,.88,1][k];
+  return `<g transform="translate(${x} ${y}) scale(${sc})" opacity="${.55+k*.1}"><ellipse cx="0" cy="0" rx="14" ry="17" fill="#2e251c"/><path d="M-24 120 Q0 14 24 120z" fill="#241c15"/></g>`;
+}
 function photoSVG(){
   const ppl=[[70,"女将 月見トキ"],[150,"板長"],[230,"仲居 はる"],[310,"番頭"],[390,"仲居見習い 月見すず（孫・十歳）"]];
   return `<svg viewBox="0 0 460 300" class="oldphoto" font-family="Noto Serif JP,serif">
    <rect width="460" height="300" fill="#d9ccb0"/><rect x="10" y="10" width="440" height="250" fill="#5a4a38"/>
    <rect x="300" y="30" width="110" height="80" fill="#2a2018"/><rect x="304" y="34" width="102" height="72" fill="#120c08"/>
-   <g class="ghost"><circle cx="352" cy="66" r="2.2" fill="#e8d8c0"/><circle cx="360" cy="66" r="2.2" fill="#e8d8c0"/><circle cx="352" cy="66" r=".9" fill="#000"/><circle cx="360" cy="66" r=".9" fill="#000"/><text x="356" y="80" font-size="1.6" fill="#c33" text-anchor="middle">うしろ</text></g>
+   ${extraFig()}
    ${ppl.map(([x,n],i)=>`<g><ellipse cx="${x}" cy="${i===4?150:130}" rx="${i===4?16:20}" ry="${i===4?19:24}" fill="#3a2e22"/><path d="M${x-(i===4?26:34)} 260 Q${x} ${i===4?160:140} ${x+(i===4?26:34)} 260z" fill="#2c231a"/></g>`).join("")}
    <text x="230" y="276" font-size="9" fill="#4a3a28" text-anchor="middle">昭和六十一年 秋　月下荘 従業員一同</text>
    <text x="230" y="290" font-size="2.1" fill="#4a3a28" text-anchor="middle">前列左より　${ppl.map(p=>p[1]).join("　")}</text>
-   <text x="392" y="248" font-size="1.4" fill="#b8a888" text-anchor="middle">名札は呼び名。本当の名で呼ばないと、この子は来ない</text>
+   <text x="392" y="248" font-size="1.4" fill="#b8a888" text-anchor="middle">名札は呼び名。本当の名で呼ばないと、この子は来ない</text><text x="230" y="296" font-size="1.5" fill="#6a5a44" text-anchor="middle">（撮影　番頭　――写っているのは、五人のはず）</text>
   </svg>`;
 }
 function bindPhoto(){
   const b=document.getElementById("photoBtn"),v=document.getElementById("photoView");if(!b||!v)return;
-  b.onclick=()=>{v.style.display="block";v.innerHTML=`<p style="font-size:12.5px;color:#9a8a76">古い集合写真。ひどく色あせている。<span class="pzhint">（二本の指で広げると、細部が見える）</span></p><div class="zoomwrap" id="zw"><div class="zoomin" id="zi">${photoSVG()}</div></div><div class="row" style="justify-content:center"><button id="zminus">－</button><button id="zplus">＋</button><button id="zclose">写真を置く</button></div>`;
+  b.onclick=()=>{S.photoN=(S.photoN||0)+1;save();v.style.display="block";v.innerHTML=`<p style="font-size:12.5px;color:#9a8a76">古い集合写真。ひどく色あせている。<span class="pzhint">（二本の指で広げると、細部が見える）</span></p><div class="zoomwrap" id="zw"><div class="zoomin" id="zi">${photoSVG()}</div></div><div class="row" style="justify-content:center"><button id="zminus">－</button><button id="zplus">＋</button><button id="zclose">写真を置く</button></div>`;
     let sc=1,tx=0,ty=0;const zi=document.getElementById("zi"),zw=document.getElementById("zw");
     const ap=()=>{sc=Math.max(1,Math.min(14,sc));const W=zw.clientWidth,H=zw.clientHeight;tx=Math.min(0,Math.max(W-W*sc,tx));ty=Math.min(0,Math.max(H-H*sc,ty));zi.style.transform=`translate(${tx}px,${ty}px) scale(${sc})`;zw.classList.toggle("deep",sc>7)};
     let p0=null;
@@ -503,7 +511,7 @@ function vYado(){
    <tr><td>令和${y-2019}年 ${MD}</td><td class="me">${esc(nm())}</td><td>閏</td><td>${S.res||"――"}</td></tr>
    <tr><td>令和${y-2020}年 ${MD}</td><td class="me">${esc(nm())}</td><td>閏</td><td>${S.res||"――"}</td></tr>
    <tr><td colspan="4" style="text-align:center">……</td></tr>
-   <tr><td colspan="4" style="text-align:center;color:#8a1d12;font-size:13px;letter-spacing:.3em">あ け て　あ け て　あ け て</td></tr></table></div>
+   <tr><td colspan="4" style="text-align:right;color:#8a7e6c;font-size:12px">（いちばん下の余白に、鉛筆で）　お連れさまは、もうお着きです</td></tr></table></div>
   <p>毎年、同じ日に、同じ名前。<br>いちばん古いページは、糊で貼りついていて、めくれない。<br>紙片がはさまっている。「<b>過去は、戻ることでしか、めくれない</b>」</p>
   <p style="margin-top:16px;font-size:13px;color:#8a7660">宿帳の横に、筆と硯。「ご記帳ください」</p>
   <button id="sign" style="margin-top:6px">宿帳に記帳する</button>
@@ -525,7 +533,7 @@ function vS61(){
   if(S.stage===3){
     h+=`<p>気がつくと、宿帳の前に立っていた。<br>帳場の灯りが、新しい。壁の暦は、<b>昭和六十一年 ${MD}</b>。<br>柱時計は、午前二時半を指して、動いている。</p>
     <p style="margin-top:14px">――廊下の奥から、足音が近づいてくる。<br>ぎし、ぎし、と。こちらへ。</p>
-    <p class="blood" style="font-size:17px;margin:12px 0">「みぃつけた」の声だけは、聞いてはいけない。<br>見なければ、見つからない。</p>
+    <p style="font-size:15px;margin:12px 0">宿帳の端に、走り書き。<br>「見なければ、見つからない」</p>
     <button id="hideBtn">身をかがめる</button>
     <div id="hideArea" style="display:none"><div class="still"><i id="stillbar"></i></div><p style="font-size:13px;color:#b9a68a" id="stillmsg">足音が、近づいてくる。</p></div>`;
   }else if(S.stage===4||S.stage===5){
@@ -545,7 +553,7 @@ function vS61(){
      <div class="it" data-lit id="suzu" style="right:8%;top:30%;width:40%"><button class="tbtn" id="suzuBtn">うずくまる、小さな影</button></div>
      <div class="it" data-lit style="left:10%;top:52%;width:40%;font-size:12px;color:#9a8a76">壁の札：「火の元用心」</div>
      <div class="it" data-lit style="left:6%;top:80%;width:48%"><button class="tbtn" id="toBtn">板壁の隙間から、冷たい風</button></div>
-     <div class="it blood" data-lit style="right:10%;top:76%;font-size:18px">うしろ</div>`;
+     <div class="it pencil" data-lit style="right:6%;top:62%;width:42%">壁に映る影が、ひとつ多い。<br>手燭は、ひとつしかないのに。</div>`;
     h+=`<p>蔵の中は、闇と煙。手燭の灯りだけが頼りだ。</p>${darkRoom("kroom",items,520)}
       <div id="suzuTalk"></div><div class="msg" id="kmsg"></div>
       <p style="margin-top:14px;font-size:13px">あるいは、来た道を戻るか。</p>
@@ -554,7 +562,7 @@ function vS61(){
     h+=`<p>板壁を押し破り、冷たい沢へ転がり出た。<br>小さな手は、まだあなたの手を握っている。</p>
      <p style="margin-top:10px">――気がつくと、夜明け前の月下荘の帳場にいた。令和の、帳場に。<br>カウンターの上で、古い行灯が一つ、まだ燃えている。<br>四十年間、消されることのなかった灯り。</p>
      <div class="lamp" id="lamp"><svg viewBox="0 0 120 160"><rect x="25" y="40" width="70" height="100" fill="#3a2a1a" stroke="#6b4a30"/><rect x="32" y="48" width="56" height="84" fill="#f3d9a0" opacity=".9"/><g id="flame"><ellipse cx="60" cy="96" rx="9" ry="20" fill="#ffb347"/><ellipse cx="60" cy="100" rx="4" ry="10" fill="#fff3c0"/></g><rect x="20" y="138" width="80" height="8" fill="#2a1d12"/></svg></div>
-     <p class="blood" style="text-align:center;font-size:16px">「灯りを、消してください。<br>わたしたちが、帰れるように」</p>
+     <p style="text-align:center;font-size:15px">行灯の紙に、薄い墨で。<br>「灯りを、消してください。わたしたちが、帰れるように」</p>
      <div style="text-align:center"><button id="blowBtn">行灯に、顔を近づける</button><p class="msg" id="bwmsg" style="color:#c9a76a"></p></div>`;
   }
   return h+`</div></div></section>`;
@@ -650,15 +658,13 @@ function shake(el){if(el)el.animate([{transform:"translateX(-5px)"},{transform:"
 function bind(h){
   const rf=document.getElementById("rf");
   if(rf) rf.onsubmit=e=>{e.preventDefault();const v=document.getElementById("rname").value.trim();if(!v)return;S.name=v.slice(0,20);S.res=RESNO;save();route()};
-  const rn=document.getElementById("rname");
-  if(rn&&S.stage>=3&&S.stage<9){const msg="すず　です　あけて";let i=0;const it=setInterval(()=>{if(!document.body.contains(rn)){clearInterval(it);return}rn.value=msg.slice(0,++i);if(i>=msg.length){clearInterval(it);setTimeout(()=>{if(document.body.contains(rn))rn.value=""},1500)}},260)}
   const uf=document.getElementById("uf");
   if(uf) uf.onsubmit=e=>{e.preventDefault();const v=norm(document.getElementById("ufi").value),m=document.getElementById("umsg");
     if(!S.res){m.textContent="錠前は動かない。……ご予約が、ないからだろうか。";shake(uf);return}
     if(v==="0245"){setStage(2);route();return}
     if(v==="0915"||v==="2115"){m.textContent="……鏡の中の時刻は、本当の時刻ではない。";shake(uf);return}
     m.textContent="錠前は、びくともしない。";shake(uf)};
-  if(document.getElementById("uroom")){bindDarkRoom("uroom");bindPhoto()}
+  if(document.getElementById("uroom")){bindDarkRoom("uroom");bindPhoto();S.fp=(S.fp||0)+1;save()}
   const bf=document.getElementById("bf");
   if(bf) bf.onsubmit=e=>{e.preventDefault();audioInit();const v=norm(document.getElementById("bfi").value),m=document.getElementById("bmsg");
     if(v===norm(SECRET)){setStage(3);location.hash="#yado";return}
@@ -671,7 +677,7 @@ function bind(h){
   const r4=document.getElementById("rooms4");
   if(r4) r4.querySelectorAll("button").forEach(b=>b.onclick=()=>{
     if(b.dataset.r==="睦月"){setStage(5);route();return}
-    T.pen+=LIMIT/15*2.5; b.disabled=true;thud(.8);buzz(200);document.getElementById("rmsg").textContent=`${b.dataset.r}の間の床の間には、何もなかった。……煙が濃くなる。`;});
+    T.pen+=LIMIT/15*2.5; b.disabled=true;document.getElementById("rmsg").textContent=`${b.dataset.r}の間の床の間には、何もなかった。……煙が濃くなる。`;});
   bindDoor();
   if(document.getElementById("kroom")){
     bindDarkRoom("kroom");
@@ -695,19 +701,17 @@ function endLines(id,x){
    2:[x==="watari"?"渡り廊下は、すでに炎に包まれていた。":x==="genkan"?"玄関へ続く廊下は、煙で何も見えなかった。":"柱時計が、午前二時四十五分を打った。","熱い。息ができない。","遠くで、女の子の泣き声がする。","……時計の針は、そこで止まった。","四十年後も、ずっと。"],
    3:["蔵の奥の板壁を押し破り、ひとりで外へ転がり出た。","振り返ると、蔵は炎の中だった。","……あの子は？","気がつくと、令和の月下荘の前に立っていた。","帳場の灯りは、今年も、消えていない。","宿帳には、今年もあなたの名前がある。"],
    4:["ふっと、灯りが消えた。","夜明けの光が、帳場に差しこむ。","背後で、年配の女将が立ちつくしていた。",`「${n}様。……お待ちしておりました」`,"「あの夜、蔵で泣いていたのは、わたしです」","「四十年かかって、ようやく、お礼が言えます」"],
-   5:["足音が、止まった。","襖が、すうっと開く。","目が、合った。",'<span style="color:#c33;font-size:22px;letter-spacing:.5em">みぃつけた</span>',"……あなたは、あの夜から出られない。"]
+   5:["足音は、あなたのすぐ前で止まった。","それきり、何も聞こえない。","どれくらい、そうしていただろう。","翌朝の宿帳には、知らない筆跡で、あなたの名前が書かれていた。","閏の間　ご一泊　――お連れ様　一名。"]
   }[id];
 }
 function ending(id,x){
   cancelAnimationFrame(T.raf);clearInterval(T.hide);clearInterval(T.hb);buzz(0);
-  if(id===5){buzz([300,100,300]);thud(1)}
   if(!S.ends.includes(id)) S.ends.push(id);
   S.stage=9;S.last=id;S.withSuzu=0;save();
   const lines=[...endLines(id,x),`<span class="en" style="font-size:14px;color:#c9a76a">${id===4?"TRUE END":"END "+id}　―　${END_T[id]}</span>`,`<small style="font-size:12px;color:#8a7660">結末 ${S.ends.length} / 5</small>`];
   const d=document.createElement("div");d.id="end";
   if(id===4) d.style.background="linear-gradient(#0b0f1a,#2a2236 60%,#a8704a)";
   if(id===2) d.style.background="radial-gradient(ellipse at 50% 110%,#5a1a08,#000 70%)";
-  if(id===5){d.innerHTML=`<div class="eyes"><span></span><span></span></div>`;d.style.background="#000"}
   d.innerHTML+=lines.map(l=>`<p>${l}</p>`).join("")+`<div><button id="eb1">トップへ戻る</button><button id="eb2">あの夜に、もう一度戻る</button></div>`;
   document.body.appendChild(d);
   const ps=d.querySelectorAll("p");
@@ -720,7 +724,8 @@ function ending(id,x){
 /* タブを離れたとき */
 const baseTitle=document.title;
 document.addEventListener("visibilitychange",()=>{document.title=document.hidden&&S.stage>=1&&S.stage<9?"灯りは、消さずにおきます":baseTitle;
-  if(!document.hidden&&S.stage>=3&&S.stage<9){const f=document.createElement("div");f.className="hflash";f.innerHTML='<svg viewBox="0 0 100 60"><g fill="#7a0d0d" opacity=".85"><path d="M20 50 q-6-18 0-30 l2 14 l2-20 l3 20 l3-18 l2 20 l3-12 q4 14-3 26z"/><path d="M70 55 q-6-18 0-30 l2 14 l2-20 l3 20 l3-18 l2 20 l3-12 q4 14-3 26z"/></g></svg>';document.body.appendChild(f);buzz(120);setTimeout(()=>f.remove(),450)}});
+  if(document.hidden){window._away=Date.now();return}
+  if(window._away&&S.stage>=3&&S.stage<9){const sec=Math.round((Date.now()-window._away)/1000);if(sec>=3){const t=document.getElementById("ticker");t.textContent=`おかえりなさいませ。${sec}秒ほど、お部屋をあけていらっしゃいましたね`;setTimeout(()=>apply(),9000)}}});
 
 document.getElementById("reset").onclick=function(){
   if(this.dataset.c){try{localStorage.removeItem(KEY)}catch(e){}S={stage:0,name:"",res:"",ends:[],last:0,visits:0,withSuzu:0};this.dataset.c="";this.textContent="データを初期化";location.hash="#top";route();}
