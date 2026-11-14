@@ -115,6 +115,34 @@ body.night{--main:#1c2233;--main2:#c9a76a;--sky:#121725;--ink:#d8d3c8;--muted:#8
 body.night .ph img{filter:brightness(.55) saturate(.6) hue-rotate(190deg)}
 body.night .ph.food img{filter:brightness(.85) saturate(1)}
 body.night .util{background:#0a0d16}
+/* ===== 仕掛け ===== */
+.troom{position:relative;margin-top:14px;border:1px solid #2a2016;background:#120d09;overflow:hidden;touch-action:none;user-select:text}
+.troom .it{position:absolute;opacity:.08;transition:opacity .4s}
+.troom .it.lit{opacity:1}
+.troom .poem{height:auto;max-height:300px;font-size:16px;margin:0;padding:14px 10px;border-width:5px}
+.tshade{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle 80px at var(--x,-300px) var(--y,-300px),rgba(255,190,110,.12) 0,rgba(0,0,0,.2) 55px,rgba(0,0,0,.97) 100px)}
+.ttip{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:12px;color:#6b5a48;pointer-events:none;transition:opacity .6s}
+.tbtn{font:inherit;font-size:13px;background:#2a1d14;color:#efe5d5;border:1px solid #6b4a30;padding:8px 10px;cursor:pointer;width:100%}
+.blood{color:#9b1c1c;font-family:"Noto Serif JP",serif;letter-spacing:.3em;text-shadow:0 0 6px rgba(155,28,28,.5)}
+.pview{margin-top:14px;border:1px solid #4a3a2a;padding:12px;background:#0e0a07}
+.zoomwrap{position:relative;width:100%;aspect-ratio:460/300;overflow:hidden;background:#000;touch-action:none;cursor:grab}
+.zoomin{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:0 0}
+.oldphoto{width:100%;height:100%;display:block;filter:sepia(.6) contrast(.95)}
+.oldphoto .ghost{opacity:0;transition:opacity 1s}
+.zoomwrap.deep .oldphoto .ghost{opacity:1}
+.door{position:relative;height:120px;border:2px solid #6b4a30;background:repeating-linear-gradient(90deg,#2a1d14 0 22px,#24180f 22px 24px);display:flex;align-items:center;justify-content:center;color:#b9a68a;letter-spacing:.4em;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;margin-top:10px}
+.door i{position:absolute;left:0;bottom:0;height:4px;width:0;background:#c9a76a}
+.lamp{width:140px;margin:16px auto;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.lamp #flame{animation:fl 1.6s infinite ease-in-out;transform-origin:60px 110px}
+@keyframes fl{50%{transform:scale(1.06,.94)}}
+.sil{position:absolute;left:50%;bottom:18%;height:calc(18px * var(--s));transform:translateX(-50%);opacity:.75;filter:blur(.6px)}
+.hflash{position:fixed;inset:0;z-index:98;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;pointer-events:none}
+.hflash svg{width:80%;max-width:500px}
+.eyes{display:flex;gap:40px;margin-bottom:20px;animation:eyes 1.2s ease-out}
+.eyes span{width:46px;height:18px;border-radius:50%;background:#e8e0d0;position:relative;box-shadow:0 0 30px #600}
+.eyes span::after{content:"";position:absolute;left:16px;top:2px;width:14px;height:14px;border-radius:50%;background:#000}
+@keyframes eyes{from{transform:scale(3);opacity:0}}
+details.h2{margin-top:6px;font-size:13px}details.h2 summary{cursor:pointer;color:var(--main2)}
 /* ===== 裏・過去 ===== */
 .dark{background:#070605;color:#d6cdbf;padding:28px 22px;font-family:"Noto Serif JP",serif;position:relative;overflow:hidden;box-shadow:inset 0 0 80px #000}
 .dark h2{font-weight:500;font-size:22px;letter-spacing:.2em;color:#e2d3b8;margin-bottom:12px}
@@ -184,13 +212,13 @@ const ph=k=>`<div class="ph${k==="food"?" food":""}">${PHOTOS[k]?`<img src="${PH
 
 /* ================= 状態 ================= */
 const KEY="gekkaso-v1";
-let S={stage:0,name:"",res:"",ends:[],last:0};
+let S={stage:0,name:"",res:"",ends:[],last:0,visits:0,withSuzu:0};
 try{S={...S,...JSON.parse(localStorage.getItem(KEY)||"{}")}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 function setStage(n){if(n>S.stage){S.stage=n;save()}apply()}
 /* stage: 0 初期 / 1 閏の間を見つけた / 2 閏の間に入った / 3 宿帳 / 4 昭和61年(足音をやり過ごした) / 5 蔵の鍵 / 9 エンド後 */
 const after=n=>S.stage===9&&S.last===n;
-const END_T={1:"記帳",2:"焼失",3:"ひとり",4:"灯り"};
+const END_T={1:"記帳",2:"焼失",3:"ひとり",4:"灯り",5:"目が合う"};
 const nm=()=>S.name||"お名前のない";
 const mq=matchMedia("(prefers-color-scheme: dark)");
 const isNight=()=>mq.matches||new Date().getHours()<5;
@@ -259,7 +287,7 @@ const newsList=max=>`<ul class="news">${newsItems().slice(0,max||99).map(x=>`<li
 
 /* ================= 表のページ ================= */
 function vTop(){
-  return `<div class="hero">${ph(isNight()?"night":"hero")}<div class="cover"></div><div class="copy">${after(4)?"灯りを、ありがとう。":isNight()?"夜の湯宿に、灯りひとつ。":"山の音を、聴きにくる。"}<small>山あいの湯宿　月下荘</small></div></div>
+  return `<div class="hero">${ph(isNight()?"night":"hero")}<div class="cover"></div>${S.stage>=3&&S.stage<9||after(1)||after(5)?`<svg class="sil" viewBox="0 0 40 100" style="--s:${Math.min(5,S.visits||1)}"><ellipse cx="20" cy="14" rx="8" ry="10" fill="#000"/><path d="M6 100 L10 30 Q20 22 30 30 L34 100z" fill="#000"/><path d="M12 12 Q20 -2 28 12 L28 26 Q20 20 12 26z" fill="#000"/></svg>`:""}<div class="copy">${after(4)?"灯りを、ありがとう。":isNight()?"夜の湯宿に、灯りひとつ。":"山の音を、聴きにくる。"}<small>山あいの湯宿　月下荘</small></div></div>
   <section><div class="inner"><div class="concept">大正十五年、湯ノ沢のほとりに一軒の湯宿が生まれました。<br>十二の客室には、十二の月の名を。<br>${isNight()?"夜が更けると、月下荘は少しだけ違う顔を見せます。":"季節がめぐるように、またお越しいただけますように。"}</div></div></section>
   <section class="alt"><div class="inner">${sh("STAY","滞在のご案内")}<div class="cards">
    <a class="card" href="#rooms">${ph("room")}<div class="meta">ROOMS</div><h3>十二の客室</h3><p>睦月から師走まで。月の名を冠した、すべて趣の異なる和室です。</p></a>
@@ -267,7 +295,7 @@ function vTop(){
    <a class="card" href="#onsen">${ph("onsen")}<div class="meta">HOT SPRING</div><h3>湯ノ沢の湯</h3><p>創業以来、絶えることなく湧き続ける源泉かけ流しの湯。</p></a>
   </div></div></section>
   <section><div class="inner" style="max-width:820px">${sh("NEWS","お知らせ")}${newsList(4)}</div></section>
-  ${S.ends.length?`<section class="alt"><div class="inner">${sh("ENDINGS","結末　"+S.ends.length+" / 4")}<div class="banners">${[1,2,3,4].map(i=>`<div class="bn"><span class="en">${i===4?"TRUE END":"END "+i}</span><b>${S.ends.includes(i)?END_T[i]:"？？？"}</b></div>`).join("")}</div>${S.ends.length<4?`<p class="note" style="margin-top:12px;text-align:center">あの夜を、別の形で終えることもできるようです。</p>`:""}</div></section>`:""}
+  ${S.ends.length?`<section class="alt"><div class="inner">${sh("ENDINGS","結末　"+S.ends.length+" / 5")}<div class="banners">${[1,2,3,5,4].map(i=>`<div class="bn"><span class="en">${i===4?"TRUE END":"END "+i}</span><b>${S.ends.includes(i)?END_T[i]:"？？？"}</b></div>`).join("")}</div>${S.ends.length<5?`<p class="note" style="margin-top:12px;text-align:center">あの夜を、別の形で終えることもできるようです。</p>`:""}</div></section>`:""}
   <section${S.ends.length?"":' class="alt"'}><div class="inner">${sh("LINKS","ご案内")}<div class="banners">
    <a class="bn" href="#reserve"><span class="en">RESERVATION</span><b>ご予約</b><small>空室状況のご確認はこちら</small></a>
    <a class="bn" href="#blog"><span class="en">JOURNAL</span><b>女将のひとりごと</b><small>四代目女将が綴る、宿の日々</small></a>
@@ -279,7 +307,7 @@ function vRooms(){
   <div class="rooms">${ROOMS.map(r=>`<div class="room"><span class="no">${r[0]}</span><b>${r[1]}</b><small>${r[2]}の間</small></div>`).join("")}</div>
   <p class="note" style="margin-top:14px">※ 客室のご指定は承っておりません。</p></div></section>`;
 }
-function vCuisine(){return head("CUISINE","お料理")+`<section style="padding-top:20px"><div class="inner"><div class="cards"><div class="card">${ph("food")}<div class="meta">夕食　18:00〜</div><h3>月見膳</h3><p>山菜、川魚、きのこ。湯ノ沢の湧き水で炊いたご飯とともに。</p></div><div class="card">${ph("irori")}<div class="meta">朝食　7:30〜　囲炉裏の間にて</div><h3>朝の膳</h3><p>自家製のお味噌汁と、焼き魚、地元の卵。</p></div></div><p class="note" style="margin-top:20px">アレルギーのある方は、ご予約時にお申し付けください。</p></div></section>`}
+function vCuisine(){return head("CUISINE","お料理")+`<section style="padding-top:20px"><div class="inner"><div class="cards"><div class="card">${ph("food")}<div class="meta">夕食　18:00〜</div><h3>月見膳</h3><p>山菜、川魚、きのこ。湯ノ沢の湧き水で炊いたご飯とともに。</p></div><div class="card">${ph("room")}<div class="meta">朝食　7:30〜</div><h3>朝の膳</h3><p>自家製のお味噌汁と、焼き魚、地元の卵。</p></div></div><p class="note" style="margin-top:20px">アレルギーのある方は、ご予約時にお申し付けください。</p></div></section>`}
 function vOnsen(){return head("HOT SPRING","温泉")+`<section style="padding-top:20px"><div class="inner"><div class="cards"><div class="card">${ph("onsen")}<div class="meta">露天風呂</div><h3>沢音の湯</h3><p>湯ノ沢のせせらぎを聞きながら。夜は満天の星。</p></div></div><table class="dtable" style="margin-top:20px"><tr><th>泉質</th><td>単純温泉（低張性弱アルカリ性高温泉）</td></tr><tr><th>ご利用時間</th><td>15:00〜翌10:00（深夜2時〜3時は清掃のため閉鎖）</td></tr></table></div></section>`}
 function mapSVG(){
   const n=isNight();
@@ -308,7 +336,7 @@ function histItems(){
 }
 function vHistory(){
   return head("HISTORY","月下荘の歩み")+`<section style="padding-top:20px"><div class="inner" style="max-width:860px">
-  <div class="clockbox">${clockSVG("hc").replace("<svg ",'<svg class="liveclock" ')}<div><b class="serif" style="font-size:16px;letter-spacing:.15em">帳場の柱時計</b><p style="font-size:14px;margin-top:6px">創業の年から、帳場で時を刻み続けている柱時計です。改装のときも、この時計だけは残しました。${isNight()?"<br><span class='glitch' style='color:var(--accent)'>……動いて、いない。</span>":""}</p></div></div>
+  <div class="clockbox"><div style="${isNight()?"transform:scaleX(-1)":""}">${clockSVG("hc").replace("<svg ",'<svg class="liveclock" ')}</div><div><b class="serif" style="font-size:16px;letter-spacing:.15em">${isNight()?"帳場の鏡に映った柱時計":"帳場の柱時計"}</b><p style="font-size:14px;margin-top:6px">創業の年から、帳場で時を刻み続けている柱時計です。改装のときも、この時計だけは残しました。${isNight()?"<br><span class='glitch' style='color:var(--accent)'>……動いて、いない。</span>":""}</p></div></div>
   <ul class="hist">${histItems().map(x=>`<li><time>${x[0]}</time><span>${x[1]}</span></li>`).join("")}</ul></div></section>`;
 }
 const POSTS=[
@@ -320,6 +348,7 @@ const POSTS=[
 ];
 function vBlog(){
   const ps=[...POSTS];
+  if(S.stage>=3&&S.stage<9) ps.unshift(["1986.11.??",'<span class="glitch">わたしを　みつけて</span>',"くらは　くらい　けむい　こわい<br>だれか　わたしの　ほんとうの　なまえを　よんで"]);
   if(after(4)) ps.unshift([`2026.${pad(now.getMonth()+1)}.${pad(now.getDate())}`,"毎年ご予約くださるお客さまへ",`${esc(nm())}様。あの夜、蔵で泣いていたわたしの手を引いてくださったのは、あなたでしたね。<br>四十年かかって、ようやくお礼が言えます。わたしの名前は、鈴（すず）。あの夜の仲居見習いです。<br>今夜、帳場の灯りを消します。どうか、ゆっくりお休みくださいませ。`]);
   return head("JOURNAL","女将のひとりごと")+`<section style="padding-top:20px"><div class="inner" style="max-width:760px">${ps.map(p=>`<div class="post"><time>${p[0]}</time><h3>${p[1]}</h3><p>${p[2]}</p><div class="by">${after(4)?"四代目女将　鈴":"四代目女将"}</div></div>`).join("")}</div></section>`;
 }
@@ -341,18 +370,22 @@ function vReserve(){
    <h3 class="sub">ご予約内容</h3>${form}</div></section>`;
 }
 function vFaq(){
+  // [問, 遠回しな答え, さらにヒント（任意）]
   let f=[["チェックインは何時からですか？","15時からでございます。最終チェックインは20時でございます。"],
    ["十三番目のお部屋はありますか？","当館の客室は、十二室でございます。……昼のうちは。"]];
   if(!S.res) f.push(["予約は必要ですか？","はい。まずはご予約くださいませ。お名前は、のちほど大切になります。"]);
-  f.push(["「夜の月下荘」とは何ですか？","お使いの端末やブラウザの表示を「ダークモード」にしますと、夜の月下荘をご覧いただけます。真夜中（0時〜5時）にお越しの方は、そのままで。"]);
-  if(S.stage>=1) f.push(["閏の間の鍵がわかりません","鍵の番号は、時刻でございます。帳場の柱時計（月下荘の歩み）を、夜にご覧ください。"]);
-  if(S.stage>=2) f.push(["呼び鈴の合言葉がわかりません","掛け軸の歌を、ご自分で書き写すのではなく、文字を選択してコピーし、そのまま貼りつけてくださいませ。"]);
-  if(S.stage>=3) f.push(["宿帳の、前のページがめくれません","過去は、戻ることでしかめくれません。ブラウザの「戻る」をお使いください。（戻る操作ができない方は、アドレスの末尾を #s61 に）"],
-    ["足音が近づいてきます","動いてはいけません。画面に触れず、スクロールもせず、息をひそめてお待ちください。"],
-    ["蔵の鍵はどこですか？","昭和六十一年の宿帳と、その夜の出来事から、最後に着いたお客さまのお部屋を推理なさってください。お部屋を間違えるたびに、火はまわります。"],
-    ["蔵から、どうやって出ればいいですか？","女将のひとりごとに、蔵のお話がございます。……おひとりで、お逃げになりませんよう。"]);
-  if(S.ends.length) f.push(["結末はひとつですか？","四つございます。宿帳に、ご記帳なさったことは？"]);
-  return head("FAQ","よくあるご質問")+`<section style="padding-top:10px"><div class="inner" style="max-width:820px">${f.map(x=>`<div class="q">${x[0]}</div><div class="a">${x[1]}</div>`).join("")}</div></section>`;
+  f.push(["夜の月下荘を見るには？","女将のひとりごとに、祖母の言葉がございます。","お使いの端末の表示を「ダークモード」にしてくださいませ。真夜中（0時〜5時）にお越しの方は、そのままで。"]);
+  if(S.stage>=1) f.push(["閏の間の錠前が開きません","あの夜の時刻でございます。ただし、鏡は嘘をつきます。","夜に「月下荘の歩み」の柱時計をご覧ください。鏡に映っておりますので、左右を反転させて読み、二十四時間表記の四桁でどうぞ。"]);
+  if(S.stage>=2) f.push(["閏の間が暗くて見えません","灯りは、かざすものでございます。","指でなぞるか、スマートフォンを傾けてください（iPhoneの方は、最初に表示される許可を「許可」に）。"],
+    ["呼び鈴の合言葉がわかりません","書き写すのではなく、写しとってくださいませ。","掛け軸の歌を選択して「コピー」し、そのまま呼び鈴の欄に「貼りつけ」てください。"]);
+  if(S.stage>=3) f.push(["宿帳の、前のページがめくれません","過去は、戻ることでしかめくれません。","ブラウザの「戻る」をお使いください。戻れない方は、アドレスの末尾を #s61 に。"],
+    ["足音に見つかってしまいます","見なければ、見つかりません。","スマートフォンの方は、画面を下にして伏せて置いてください。パソコンの方は、何も触らずにお待ちください。"],
+    ["蔵の鍵はどの部屋ですか？","すずの残した六つの手がかりは、どれも欠かせません。","表を作り、お客さまと到着時刻とお部屋を一つずつ埋めてくださいませ。お部屋を間違えるたびに、火はまわります。"],
+    ["蔵の扉が開きません","片手では、びくともいたしません。","二本の指で扉を押さえ続けてください。パソコンの方は長押しで。"],
+    ["すずが返事をしてくれません","名札は、呼び名にすぎません。","閏の間の古い写真を、指で大きく広げてご覧ください。"],
+    ["灯りが消せません","灯りを消すのは、息でございます。","マイクの使用を許可し、画面に向かって息を吹きかけてください。マイクが使えない方は、行灯を長押しで。"]);
+  if(S.ends.length) f.push(["結末はひとつですか？","五つございます。"]);
+  return head("FAQ","よくあるご質問")+`<section style="padding-top:10px"><div class="inner" style="max-width:820px">${f.map(x=>`<div class="q">${x[0]}</div><div class="a">${x[1]}${x[2]?`<details class="h2"><summary>さらにヒントを見る</summary>${x[2]}</details>`:""}</div>`).join("")}</div></section>`;
 }
 function vNews(){return head("NEWS","お知らせ")+`<section style="padding-top:20px"><div class="inner" style="max-width:820px">${newsList()}</div></section>`}
 function vCredits(){
@@ -360,6 +393,40 @@ function vCredits(){
   return head("PHOTO CREDITS","写真クレジット")+`<section style="padding-top:20px"><div class="inner"><ul class="news">${e.map(([k,c])=>`<li style="grid-template-columns:1fr"><span style="font-size:13px">${c.artist}／${c.license}<br><a style="color:var(--main2);word-break:break-all" href="${c.page}">${c.file}</a></span></li>`).join("")}</ul><p class="note" style="margin-top:10px">掲載写真は Wikimedia Commons の自由ライセンス画像です。本サイトは架空の旅館を舞台にした謎解きゲームであり、実在の施設とは関係ありません。</p></div></section>`;
 }
 function notFound(){return head("404","ページが見つかりません")+`<section style="padding-top:20px"><div class="inner"><p>お探しのページは見つかりませんでした。</p><a class="btn" href="#top">トップへ</a></div></section>`}
+
+/* ================= 共通：暗がりを照らす（傾き／指） ================= */
+const SENS={on:false,b:null,g:null};
+function askSensors(){ // iOS は許可が必要
+  try{
+    if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==="function") DeviceOrientationEvent.requestPermission().catch(()=>{});
+    if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==="function") DeviceMotionEvent.requestPermission().catch(()=>{});
+  }catch(e){}
+}
+window.addEventListener("deviceorientation",e=>{if(e.beta!==null){SENS.on=true;SENS.b=e.beta;SENS.g=e.gamma}});
+function darkRoom(id,items,h){
+  return `<div class="troom" id="${id}" style="height:${h||460}px">${items}<div class="tshade"></div><div class="ttip">${SENS.on?"スマホを傾けて、灯りを向ける":"灯りをかざす（指でなぞる／スマホを傾ける）"}</div></div>`;
+}
+function bindDarkRoom(id){
+  const el=document.getElementById(id);if(!el)return;
+  const sd=el.querySelector(".tshade"),tip=el.querySelector(".ttip");
+  const set=(x,y)=>{sd.style.setProperty("--x",x+"px");sd.style.setProperty("--y",y+"px");tip.style.opacity=0;
+    el.querySelectorAll("[data-lit]").forEach(it=>{const r=it.getBoundingClientRect(),R=el.getBoundingClientRect();const cx=r.left-R.left+r.width/2,cy=r.top-R.top+r.height/2;it.classList.toggle("lit",Math.hypot(cx-x,cy-y)<90)})};
+  const mv=(cx,cy)=>{const r=el.getBoundingClientRect();set(cx-r.left,cy-r.top)};
+  el.addEventListener("pointermove",e=>mv(e.clientX,e.clientY));
+  el.addEventListener("pointerdown",e=>{askSensors();mv(e.clientX,e.clientY)});
+  let raf;const loop=()=>{if(!document.body.contains(el))return;
+    if(SENS.on&&SENS.g!==null){const r=el.getBoundingClientRect();const x=(Math.max(-35,Math.min(35,SENS.g))+35)/70*r.width;const y=(Math.max(5,Math.min(75,SENS.b))-5)/70*r.height;set(x,y)}
+    raf=requestAnimationFrame(loop)};loop();
+}
+
+/* ================= 音（足音・耳鳴り） ================= */
+let AC=null;
+function audioInit(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch(e){}}
+function thud(vol){
+  if(!AC)return;try{const t=AC.currentTime;const o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.setValueAtTime(90,t);o.frequency.exponentialRampToValueAtTime(40,t+.18);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.3)}catch(e){}
+}
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
 
 /* ================= 閏の間 ================= */
 const POEM="月の下　ひとつ灯りを　消さずおく　帰らぬ人の　帰る道とて";
@@ -369,16 +436,22 @@ function vUruu(){
   if(S.stage<2){
     if(!isNight()) return `<section style="padding:30px 0"><div class="inner" style="max-width:720px"><div class="dark"><div class="warn">ROOM XIII</div><p>渡り廊下の先には、何もなかった。<br>……昼のうちは。</p></div></div></section>`;
     return `<section style="padding:30px 0"><div class="inner" style="max-width:720px"><div class="dark"><div class="warn">ROOM XIII</div><h2>閏の間</h2>
-    <p>渡り廊下の先に、煤けた襖がある。<br>引き手には、四つの数字を合わせる古い錠前。<br>襖には、墨で書かれた札が一枚。</p>
-    <p style="margin:14px 0;padding:12px;border:1px solid #4a3a2a;font-size:15px">「この部屋の時は、あの夜から動いていない」</p>
+    <p>渡り廊下の先に、煤けた襖がある。<br>引き手には、四つの数字を合わせる古い錠前。<br>襖に、墨で書かれた札が一枚。</p>
+    <p style="margin:14px 0;padding:12px;border:1px solid #4a3a2a;font-size:15px">「この部屋の時は、あの夜から動いていない。<br>　ただし、鏡は嘘をつく」</p>
     ${S.res?"":"<p style='color:#e07a5f;font-size:13px'>錠前の下に小さな文字：「ご予約のお客さまに限ります」</p>"}
     <form class="row" id="uf"><input id="ufi" placeholder="四桁の数字" inputmode="numeric" maxlength="4" autocomplete="off"><button>開ける</button></form><div class="msg" id="umsg"></div></div></div></section>`;
   }
+  const items=`
+   <div class="it" data-lit style="left:6%;top:4%;width:46%"><div class="poem" id="poem">${POEM}</div></div>
+   <div class="it" data-lit style="right:5%;top:8%;width:40%;font-size:13px">紙片：「この歌を<b>写しとって</b>、呼び鈴に聞かせてください」</div>
+   <div class="it" data-lit style="right:6%;top:36%;width:40%"><button id="photoBtn" class="tbtn">古い写真を手にとる</button></div>
+   <div class="it blood" data-lit style="left:10%;top:76%;font-size:20px">み つ け て</div>
+   <div class="it" data-lit style="right:8%;top:72%;width:38%;font-size:12px;color:#9a8a76">焦げた畳に、小さな足あと。<br>渡り廊下のほうへ続いている。</div>`;
   return `<section style="padding:30px 0"><div class="inner" style="max-width:720px"><div class="dark"><div class="warn">ROOM XIII</div><h2>閏の間</h2>
-   <p>六畳ほどの和室。畳は焦げ、床の間には掛け軸が一幅だけ残っている。<br>掛け軸の脇に、帳場の呼び鈴と、紙片。</p>
-   <div class="poem" id="poem">${POEM}</div>
-   <p style="font-size:13.5px;border:1px solid #4a3a2a;padding:10px">紙片：「この歌を<b>写しとって</b>、呼び鈴に聞かせてください」</p>
-   ${S.stage>=3?`<p style="margin-top:14px"><a href="#yado" style="color:#d9b97a;border-bottom:1px solid">宿帳を見る</a></p>`:`<form class="row" id="bf"><input id="bfi" placeholder="呼び鈴に聞かせる言葉" autocomplete="off"><button>鳴らす</button></form><div class="msg" id="bmsg"></div>`}
+   <p>中は真っ暗だった。手さぐりで、灯りの入った手燭をつかむ。</p>
+   ${darkRoom("uroom",items,560)}
+   <div id="photoView" class="pview" style="display:none"></div>
+   ${S.stage>=3?`<p style="margin-top:14px"><a href="#yado" style="color:#d9b97a;border-bottom:1px solid">宿帳を見る</a></p>`:`<p style="margin-top:14px;font-size:13px">床の間の脇に、帳場の呼び鈴がある。</p><form class="row" id="bf"><input id="bfi" placeholder="呼び鈴に聞かせる言葉" autocomplete="off"><button>鳴らす</button></form><div class="msg" id="bmsg"></div>`}
   </div></div></section>`;
 }
 document.addEventListener("copy",e=>{
@@ -386,92 +459,174 @@ document.addEventListener("copy",e=>{
   const p=document.getElementById("poem");
   if(p&&p.contains(sel.anchorNode)&&e.clipboardData){e.clipboardData.setData("text/plain",SECRET);e.preventDefault()}
 });
+/* 古い写真（ピンチで拡大） */
+function photoSVG(){
+  const ppl=[[70,"女将 月見トキ"],[150,"板長"],[230,"仲居 はる"],[310,"番頭"],[390,"仲居見習い 月見すず（孫・十歳）"]];
+  return `<svg viewBox="0 0 460 300" class="oldphoto" font-family="Noto Serif JP,serif">
+   <rect width="460" height="300" fill="#d9ccb0"/><rect x="10" y="10" width="440" height="250" fill="#5a4a38"/>
+   <rect x="300" y="30" width="110" height="80" fill="#2a2018"/><rect x="304" y="34" width="102" height="72" fill="#120c08"/>
+   <g class="ghost"><circle cx="352" cy="66" r="2.2" fill="#e8d8c0"/><circle cx="360" cy="66" r="2.2" fill="#e8d8c0"/><circle cx="352" cy="66" r=".9" fill="#000"/><circle cx="360" cy="66" r=".9" fill="#000"/><text x="356" y="80" font-size="1.6" fill="#c33" text-anchor="middle">うしろ</text></g>
+   ${ppl.map(([x,n],i)=>`<g><ellipse cx="${x}" cy="${i===4?150:130}" rx="${i===4?16:20}" ry="${i===4?19:24}" fill="#3a2e22"/><path d="M${x-(i===4?26:34)} 260 Q${x} ${i===4?160:140} ${x+(i===4?26:34)} 260z" fill="#2c231a"/></g>`).join("")}
+   <text x="230" y="276" font-size="9" fill="#4a3a28" text-anchor="middle">昭和六十一年 秋　月下荘 従業員一同</text>
+   <text x="230" y="290" font-size="2.1" fill="#4a3a28" text-anchor="middle">前列左より　${ppl.map(p=>p[1]).join("　")}</text>
+   <text x="392" y="248" font-size="1.4" fill="#b8a888" text-anchor="middle">名札は呼び名。本当の名で呼ばないと、この子は来ない</text>
+  </svg>`;
+}
+function bindPhoto(){
+  const b=document.getElementById("photoBtn"),v=document.getElementById("photoView");if(!b||!v)return;
+  b.onclick=()=>{v.style.display="block";v.innerHTML=`<p style="font-size:12.5px;color:#9a8a76">古い集合写真。ひどく色あせている。<span class="pzhint">（二本の指で広げると、細部が見える）</span></p><div class="zoomwrap" id="zw"><div class="zoomin" id="zi">${photoSVG()}</div></div><div class="row" style="justify-content:center"><button id="zminus">－</button><button id="zplus">＋</button><button id="zclose">写真を置く</button></div>`;
+    let sc=1,tx=0,ty=0;const zi=document.getElementById("zi"),zw=document.getElementById("zw");
+    const ap=()=>{sc=Math.max(1,Math.min(14,sc));const W=zw.clientWidth,H=zw.clientHeight;tx=Math.min(0,Math.max(W-W*sc,tx));ty=Math.min(0,Math.max(H-H*sc,ty));zi.style.transform=`translate(${tx}px,${ty}px) scale(${sc})`;zw.classList.toggle("deep",sc>7)};
+    let p0=null;
+    zw.addEventListener("touchstart",e=>{if(e.touches.length===2){const[a,c]=e.touches;p0={d:Math.hypot(a.clientX-c.clientX,a.clientY-c.clientY),s:sc,mx:(a.clientX+c.clientX)/2,my:(a.clientY+c.clientY)/2,tx,ty}}else if(e.touches.length===1){p0={pan:1,x:e.touches[0].clientX,y:e.touches[0].clientY,tx,ty}}},{passive:true});
+    zw.addEventListener("touchmove",e=>{if(!p0)return;e.preventDefault();const r=zw.getBoundingClientRect();
+      if(e.touches.length===2&&p0.d){const[a,c]=e.touches;const d=Math.hypot(a.clientX-c.clientX,a.clientY-c.clientY);const ns=Math.max(1,Math.min(14,p0.s*d/p0.d));const ox=p0.mx-r.left,oy=p0.my-r.top;tx=ox-(ox-p0.tx)*ns/p0.s;ty=oy-(oy-p0.ty)*ns/p0.s;sc=ns;ap()}
+      else if(e.touches.length===1&&p0.pan){tx=p0.tx+e.touches[0].clientX-p0.x;ty=p0.ty+e.touches[0].clientY-p0.y;ap()}},{passive:false});
+    zw.addEventListener("touchend",()=>{p0=null});
+    zw.addEventListener("wheel",e=>{e.preventDefault();const r=zw.getBoundingClientRect(),ox=e.clientX-r.left,oy=e.clientY-r.top,ns=Math.max(1,Math.min(14,sc*(e.deltaY<0?1.15:1/1.15)));tx=ox-(ox-tx)*ns/sc;ty=oy-(oy-ty)*ns/sc;sc=ns;ap()},{passive:false});
+    let dg=null;zw.addEventListener("mousedown",e=>{dg={x:e.clientX,y:e.clientY,tx,ty}});window.addEventListener("mouseup",()=>dg=null);
+    zw.addEventListener("mousemove",e=>{if(dg){tx=dg.tx+e.clientX-dg.x;ty=dg.ty+e.clientY-dg.y;ap()}});
+    const zc=f=>{const W=zw.clientWidth/2,H=zw.clientHeight/2,ns=Math.max(1,Math.min(14,sc*f));tx=W-(W-tx)*ns/sc;ty=H-(H-ty)*ns/sc;sc=ns;ap()};document.getElementById("zplus").onclick=()=>zc(1.3);document.getElementById("zminus").onclick=()=>zc(1/1.3);
+    document.getElementById("zclose").onclick=()=>{v.style.display="none"};
+    v.scrollIntoView({behavior:"smooth",block:"center"});
+  };
+}
 
 /* ================= 宿帳（戻るボタンで過去へ） ================= */
 function vYado(){
   if(S.stage<3) return notFound();
   const y=now.getFullYear();
   return `<section style="padding:30px 0"><div class="inner" style="max-width:720px"><div class="dark"><div class="warn">GUEST BOOK</div><h2>宿帳</h2>
-  <p>呼び鈴を鳴らすと、帳場のほうで灯りがともった。<br>誰もいない帳場に、宿帳が開いて置かれている。</p>
+  <p>呼び鈴を鳴らすと、誰もいないはずの帳場で、灯りがともった。<br>宿帳が、開いて置かれている。</p>
   <div class="ledger"><table><tr><th>日付</th><th>お名前</th><th>お部屋</th><th>予約番号</th></tr>
    <tr><td>令和${y-2018}年 ${MD}</td><td class="me">${esc(nm())}</td><td>閏</td><td>${S.res||"――"}</td></tr>
    <tr><td>令和${y-2019}年 ${MD}</td><td class="me">${esc(nm())}</td><td>閏</td><td>${S.res||"――"}</td></tr>
    <tr><td>令和${y-2020}年 ${MD}</td><td class="me">${esc(nm())}</td><td>閏</td><td>${S.res||"――"}</td></tr>
-   <tr><td colspan="4" style="text-align:center">……</td></tr></table></div>
+   <tr><td colspan="4" style="text-align:center">……</td></tr>
+   <tr><td colspan="4" style="text-align:center;color:#8a1d12;font-size:13px;letter-spacing:.3em">あ け て　あ け て　あ け て</td></tr></table></div>
   <p>毎年、同じ日に、同じ名前。<br>いちばん古いページは、糊で貼りついていて、めくれない。<br>紙片がはさまっている。「<b>過去は、戻ることでしか、めくれない</b>」</p>
   <p style="margin-top:16px;font-size:13px;color:#8a7660">宿帳の横に、筆と硯。「ご記帳ください」</p>
   <button id="sign" style="margin-top:6px">宿帳に記帳する</button>
   </div></div></section>`;
 }
-function armBack(){ // 宿帳の「ひとつ前」を、昭和61年にすり替える
-  try{history.replaceState(null,"","#s61");history.pushState(null,"","#yado")}catch(e){}
-}
+function armBack(){try{history.replaceState(null,"","#s61");history.pushState(null,"","#yado")}catch(e){}}
 
 /* ================= 昭和61年 ================= */
-let T={start:0,pen:0,raf:0,idle:0};
-const LIMIT=240000; // 実時間4分で 2:30 → 2:45
+/* stage 3: 足音 / 4: 宿帳の推理 / 5: 蔵の鍵 / 6: 蔵の中 / 7: 脱出（灯り） */
+let T={start:0,pen:0,raf:0,hide:0,hb:0};
+const LIMIT=300000; // 実時間5分で 2:30 → 2:45
 function gameMin(){return Math.min(15,Math.floor((Date.now()-T.start+T.pen)/(LIMIT/15)))}
+const LOGIC=["葉月の間のお客さまは、加藤さまより、ちょうど二時間早く着いた。","森さまのお部屋の番号は、森さまが着いた時刻の一の位より小さい。","卯月の間のお客さまは、睦月の間のお客さまより先に着いた。","弥生の間のお客さまは、いちばん最初でも、いちばん最後でもない。","加藤さまのお部屋の番号は、田村さまのお部屋の番号より大きい。","お部屋の番号が奇数のお二人は、続けて着いた。"];
 function vS61(){
   if(S.stage<3||S.stage>=9) return notFound();
   let h=`<section style="padding:24px 0"><div class="inner" style="max-width:720px">`;
-  if(S.stage>=4) h+=`<div class="timer"><span>${clockSVG("pc")}</span><div><b>昭和六十一年 ${MD}</b><br>帳場の柱時計　<span id="ptime">午前2時30分</span>　<span id="pwarn"></span></div></div>`;
-  h+=`<div class="dark"><div class="smoke" id="smoke"></div><div class="warn">SHOWA 61</div><h2>あの夜</h2>
-   <p>気がつくと、宿帳の前に立っていた。<br>帳場の灯りが、新しい。壁の暦は、<b>昭和六十一年 ${MD}</b>。<br>柱時計は、午前二時半を指して、動いている。</p>`;
-  if(S.stage<4){
-    h+=`<p style="margin-top:14px">――廊下の奥から、足音が近づいてくる。<br>見つかっては、いけない気がする。</p>
-    <div class="still"><i id="stillbar"></i></div><p style="font-size:12px;color:#8a7660" id="stillmsg">……</p>`;
-  }else{
-    h+=`<p style="margin-top:12px;color:#c9a76a">足音は、遠ざかっていった。<br>かわりに、焦げくさい匂い。離れのほうから、煙が流れてくる。</p>
+  if(S.stage>=4&&S.stage<7) h+=`<div class="timer"><span>${clockSVG("pc")}</span><div><b>昭和六十一年 ${MD}</b><br>帳場の柱時計　<span id="ptime">午前2時30分</span>　<span id="pwarn"></span></div></div>`;
+  h+=`<div class="dark"><div class="smoke" id="smoke"></div><div class="warn">SHOWA 61</div><h2>${S.stage>=7?"夜明け":"あの夜"}</h2>`;
+  if(S.stage===3){
+    h+=`<p>気がつくと、宿帳の前に立っていた。<br>帳場の灯りが、新しい。壁の暦は、<b>昭和六十一年 ${MD}</b>。<br>柱時計は、午前二時半を指して、動いている。</p>
+    <p style="margin-top:14px">――廊下の奥から、足音が近づいてくる。<br>ぎし、ぎし、と。こちらへ。</p>
+    <p class="blood" style="font-size:17px;margin:12px 0">「みぃつけた」の声だけは、聞いてはいけない。<br>見なければ、見つからない。</p>
+    <button id="hideBtn">身をかがめる</button>
+    <div id="hideArea" style="display:none"><div class="still"><i id="stillbar"></i></div><p style="font-size:13px;color:#b9a68a" id="stillmsg">足音が、近づいてくる。</p></div>`;
+  }else if(S.stage===4||S.stage===5){
+    h+=`<p style="color:#c9a76a">足音は、遠ざかっていった。<br>かわりに、焦げくさい匂い。離れのほうから、煙が流れてくる。</p>
     <div class="ledger"><b>昭和六十一年 ${MD} の宿帳</b><table><tr><th>お名前</th><th>到着</th><th>お部屋</th></tr>
-     <tr><td>田村 様</td><td>？</td><td>？</td></tr><tr><td>小野 様</td><td>？</td><td>？</td></tr><tr><td>森 様</td><td>？</td><td>？</td></tr><tr><td>加藤 様</td><td>？</td><td>？</td></tr>
+     ${["田村","小野","森","加藤"].map(n=>`<tr><td>${n} 様</td><td>？</td><td>？</td></tr>`).join("")}
      <tr><td class="me">${esc(nm())} 様</td><td>――</td><td>閏</td></tr></table>
-     <p style="font-size:13px;margin-top:10px">余白に、仲居見習いの丸い字で：</p>
-     <ol style="font-size:13.5px;padding-left:1.4em;line-height:1.9">
-      <li>この日のお客さまは、15時・16時・17時・18時に一人ずつ。お部屋は睦月・弥生・卯月・葉月。</li>
-      <li>葉月の間のお客さまが、いちばんに着いた。</li>
-      <li>卯月の間のお客さまは、17時に着いた。</li>
-      <li>加藤さまは弥生の間。最後に着いたのは、加藤さまではない。</li>
-      <li>田村さまは、森さまより、あとに着いた。</li>
-      <li>小野さまは卯月の間ではないし、最後でもない。</li>
-      <li>森さまのお部屋の番号は、田村さまのお部屋の番号より大きい。</li>
-     </ol>
-     <p style="font-size:13.5px;margin-top:8px">「蔵の鍵は、<b>最後に着いたお客さまのお部屋</b>の床の間に、おあずけしました。　すず」</p></div>`;
-    if(S.stage<5){
-      h+=`<p>どの部屋を探す？</p><div class="choice" id="rooms4">${["睦月","弥生","卯月","葉月"].map(r=>`<button data-r="${r}">${r}の間</button>`).join("")}</div><div class="msg" id="rmsg"></div>`;
-    }else{
-      h+=`<p style="color:#c9a76a">睦月の間の床の間に、古い鍵があった。<br>煙をかきわけて、裏の蔵へ走る。</p>
-      <p style="margin-top:12px">蔵の戸を開けると、暗がりの奥で、小さな女の子が膝を抱えていた。<br>仲居見習いの着物。胸の名札に「すず」。<br>「……だれ？　こわいよ」</p>
-      <div class="choice" id="kura"><button id="hand">すずの手を引く</button></div><p class="msg" id="hmsg" style="color:#c9a76a"></p>
-      <p style="margin-top:12px">煙が、蔵の中まで入ってくる。どこから出る？</p>
-      <div class="choice"><button data-x="watari">渡り廊下へ戻る</button><button data-x="genkan">本館の玄関へ走る</button><button data-x="oku">蔵の奥を手さぐりする</button></div>`;
-    }
+     <p style="font-size:13px;margin-top:10px">この日のお客さまは、15時・16時・17時・18時にお一人ずつ。お部屋は睦月（一）・弥生（三）・卯月（四）・葉月（八）。余白に、仲居見習いの丸い字で：</p>
+     <ol style="font-size:13.5px;padding-left:1.4em;line-height:1.9">${LOGIC.map(c=>`<li>${c}</li>`).join("")}</ol>
+     <p style="font-size:13.5px;margin-top:8px">「蔵の鍵は、<b>最後に着いたお客さま</b>のお部屋の、床の間におあずけしました。　すず」</p></div>`;
+    if(S.stage===4) h+=`<p>どの部屋を探す？　<small style="color:#8a7660">（間違えるたびに、火はまわる）</small></p><div class="choice" id="rooms4">${["睦月","弥生","卯月","葉月"].map(r=>`<button data-r="${r}">${r}の間</button>`).join("")}</div><div class="msg" id="rmsg"></div>`;
+    else h+=`<p style="color:#c9a76a">睦月の間の床の間に、古い鍵があった。<br>煙をかきわけて、裏の蔵へ走る。</p>
+      <p style="margin-top:12px">蔵の扉は、ひどく重い。<b>片手では、びくともしない。</b></p>
+      <div class="door" id="door"><span>蔵の扉</span><i id="doorbar"></i></div><p class="msg" id="dmsg"></p>`;
+  }else if(S.stage===6){
+    const items=`<div class="it" data-lit style="left:8%;top:10%;width:44%;font-size:13px">積まれた葛籠。焦げた匂い。</div>
+     <div class="it" data-lit id="suzu" style="right:8%;top:30%;width:40%"><button class="tbtn" id="suzuBtn">うずくまる、小さな影</button></div>
+     <div class="it" data-lit style="left:10%;top:52%;width:40%;font-size:12px;color:#9a8a76">壁の札：「火の元用心」</div>
+     <div class="it" data-lit style="left:6%;top:80%;width:48%"><button class="tbtn" id="toBtn">板壁の隙間から、冷たい風</button></div>
+     <div class="it blood" data-lit style="right:10%;top:76%;font-size:18px">うしろ</div>`;
+    h+=`<p>蔵の中は、闇と煙。手燭の灯りだけが頼りだ。</p>${darkRoom("kroom",items,520)}
+      <div id="suzuTalk"></div><div class="msg" id="kmsg"></div>
+      <p style="margin-top:14px;font-size:13px">あるいは、来た道を戻るか。</p>
+      <div class="choice"><button data-x="watari">渡り廊下へ戻る</button><button data-x="genkan">本館の玄関へ走る</button></div>`;
+  }else if(S.stage===7){
+    h+=`<p>板壁を押し破り、冷たい沢へ転がり出た。<br>小さな手は、まだあなたの手を握っている。</p>
+     <p style="margin-top:10px">――気がつくと、夜明け前の月下荘の帳場にいた。令和の、帳場に。<br>カウンターの上で、古い行灯が一つ、まだ燃えている。<br>四十年間、消されることのなかった灯り。</p>
+     <div class="lamp" id="lamp"><svg viewBox="0 0 120 160"><rect x="25" y="40" width="70" height="100" fill="#3a2a1a" stroke="#6b4a30"/><rect x="32" y="48" width="56" height="84" fill="#f3d9a0" opacity=".9"/><g id="flame"><ellipse cx="60" cy="96" rx="9" ry="20" fill="#ffb347"/><ellipse cx="60" cy="100" rx="4" ry="10" fill="#fff3c0"/></g><rect x="20" y="138" width="80" height="8" fill="#2a1d12"/></svg></div>
+     <p class="blood" style="text-align:center;font-size:16px">「灯りを、消してください。<br>わたしたちが、帰れるように」</p>
+     <div style="text-align:center"><button id="blowBtn">行灯に、顔を近づける</button><p class="msg" id="bwmsg" style="color:#c9a76a"></p></div>`;
   }
   return h+`</div></div></section>`;
 }
-let holding=false;
 function startTimer(){
   if(!T.start) T.start=Date.now();
-  cancelAnimationFrame(T.raf);
+  cancelAnimationFrame(T.raf);clearInterval(T.hb);
+  T.hb=setInterval(()=>{const m=gameMin();if(m>=10){buzz([60,120,60]);thud(.25)}},1100);
   const loop=()=>{
-    const el=document.getElementById("ptime");if(!el)return;
+    const el=document.getElementById("ptime");if(!el){clearInterval(T.hb);return}
     const m=gameMin();el.textContent=`午前2時${30+m}分`;
     setHands(document.getElementById("pc"),2,30+m,null);
-    const sm=document.getElementById("smoke");if(sm)sm.style.setProperty("--f",(m/15*.8).toFixed(2));
+    const sm=document.getElementById("smoke");if(sm)sm.style.setProperty("--f",(m/15*.85).toFixed(2));
     document.getElementById("pwarn").textContent=m>=12?"――火が、まわる":"";
     if(m>=15){ending(2);return}
     T.raf=requestAnimationFrame(loop)};
   loop();
 }
-function startIdle(){
-  clearInterval(T.idle);let still=0;const need=12;
-  const reset=()=>{still=0;const m=document.getElementById("stillmsg");if(m)m.textContent="……動いた。足音が、こちらへ向かってくる。"};
-  ["pointerdown","pointermove","touchstart","wheel","keydown","scroll"].forEach(ev=>window.addEventListener(ev,reset,{passive:true}));
-  T.idle=setInterval(()=>{
-    const b=document.getElementById("stillbar");if(!b){clearInterval(T.idle);return}
-    still++;b.style.width=Math.min(100,still/need*100)+"%";
-    const m=document.getElementById("stillmsg");if(m&&still>1)m.textContent=still<need?"……息をひそめる。":"";
-    if(still>=need){clearInterval(T.idle);["pointerdown","pointermove","touchstart","wheel","keydown","scroll"].forEach(ev=>window.removeEventListener(ev,reset));setStage(4);T.start=Date.now();T.pen=0;route()}
+/* 足音：スマホは「画面を伏せる」、それ以外は「動かない」 */
+function startHide(){
+  audioInit();askSensors();
+  document.getElementById("hideBtn").style.display="none";document.getElementById("hideArea").style.display="block";
+  let t=0,ok=0,moved=false;const need=6,limit=24;
+  const mark=()=>{moved=true};
+  const evs=["pointerdown","pointermove","touchstart","wheel","keydown","scroll"];
+  evs.forEach(ev=>window.addEventListener(ev,mark,{passive:true}));
+  clearInterval(T.hide);
+  T.hide=setInterval(()=>{
+    const b=document.getElementById("stillbar"),m=document.getElementById("stillmsg");
+    if(!b){clearInterval(T.hide);evs.forEach(ev=>window.removeEventListener(ev,mark));return}
+    t++;thud(Math.min(.9,.1+t*.035));if(t>limit-8)buzz(80);
+    const faceDown=SENS.on&&SENS.b!==null&&Math.abs(SENS.b)>150;
+    const hidden= SENS.on? faceDown : !moved;
+    if(hidden) ok++; else ok=0;
+    moved=false;
+    b.style.width=Math.min(100,ok/need*100)+"%";
+    if(m) m.textContent= ok>0?"……息をひそめる。足音が、すぐそばで止まった。": t<8?"ぎし……ぎし……":t<16?"襖の向こうに、誰かが立っている。":"「――そこに、いるの？」";
+    if(ok>=need){clearInterval(T.hide);evs.forEach(ev=>window.removeEventListener(ev,mark));buzz(0);setStage(4);T.start=Date.now();T.pen=0;route();return}
+    if(t>=limit){clearInterval(T.hide);evs.forEach(ev=>window.removeEventListener(ev,mark));ending(5)}
   },1000);
+}
+/* 蔵の扉：二本指で押し続ける（指が使えない環境は長押し） */
+function bindDoor(){
+  const d=document.getElementById("door");if(!d)return;
+  const touch=("ontouchstart" in window)||navigator.maxTouchPoints>0;
+  let t0=0,raf=0,on=false;const need=touch?2200:4000;
+  const go=()=>{const p=Math.min(1,(Date.now()-t0)/need);document.getElementById("doorbar").style.width=p*100+"%";if(p>=1){setStage(6);route();return}if(on)raf=requestAnimationFrame(go)};
+  const stop=()=>{on=false;cancelAnimationFrame(raf);const b=document.getElementById("doorbar");if(b)b.style.width="0"};
+  d.addEventListener("touchstart",e=>{e.preventDefault();if(e.touches.length>=2){if(!on){on=true;t0=Date.now();go()}}else{document.getElementById("dmsg").textContent="……片手では、びくともしない。"}},{passive:false});
+  d.addEventListener("touchend",e=>{if(e.touches.length<2)stop()});
+  if(!touch){d.addEventListener("mousedown",()=>{on=true;t0=Date.now();go()});window.addEventListener("mouseup",stop)}
+}
+/* 行灯：息を吹きかけて消す（マイク）／使えないときは長押し */
+async function blow(){
+  const msg=document.getElementById("bwmsg"),fl=document.getElementById("flame");
+  const done=()=>{fl.style.transition="opacity 1.5s";fl.style.opacity=0;setTimeout(()=>ending(4),1600)};
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({audio:true});
+    msg.textContent="……ふっと、息を吹きかけて。（音声は記録も送信もされません）";
+    const ac=new (window.AudioContext||window.webkitAudioContext)(),src=ac.createMediaStreamSource(st),an=ac.createAnalyser();an.fftSize=1024;src.connect(an);
+    const buf=new Uint8Array(an.fftSize);let hold=0;
+    const tick=()=>{an.getByteTimeDomainData(buf);let s=0;for(const v of buf){const x=(v-128)/128;s+=x*x}const rms=Math.sqrt(s/buf.length);
+      fl.style.transform=`translate(60px,96px) scale(${1-Math.min(.6,rms*2)}) translate(-60px,-96px)`;
+      if(rms>.18) hold++; else hold=Math.max(0,hold-1);
+      if(hold>12){st.getTracks().forEach(t=>t.stop());ac.close();done();return}
+      requestAnimationFrame(tick)};tick();
+  }catch(e){
+    msg.innerHTML="マイクが使えないようです。<br>かわりに、行灯を<b>長く押さえて</b>、灯りを覆ってください。";
+    const l=document.getElementById("lamp");let t0=0,on=false;
+    const go=()=>{if(!on)return;const p=(Date.now()-t0)/3000;fl.style.opacity=1-p;if(p>=1){on=false;done();return}requestAnimationFrame(go)};
+    l.onpointerdown=e=>{e.preventDefault();on=true;t0=Date.now();go()};l.onpointerup=l.onpointerleave=()=>{on=false;if(fl.style.opacity>0)fl.style.opacity=1};
+  }
 }
 
 /* ================= ルーティング ================= */
@@ -483,6 +638,7 @@ function route(){
   document.getElementById("gnav").innerHTML=PAGES.map(([k,v])=>`<a href="#${k}" class="${k===h?"on":""}">${v}</a>`).join("");
   document.getElementById("drawer").innerHTML=[...PAGES,...EXTRA].map(([k,v])=>`<a href="#${k}">${v}</a>`).join("");
   document.getElementById("drawer").classList.remove("open");
+  if(h==="top"&&S.stage>=3){S.visits=(S.visits||0)+1;save()}
   document.getElementById("main").innerHTML=(VIEWS[h]||notFound)();
   if(lastHash!==h) window.scrollTo(0,0);
   lastHash=h; bind(h);
@@ -494,30 +650,41 @@ function shake(el){if(el)el.animate([{transform:"translateX(-5px)"},{transform:"
 function bind(h){
   const rf=document.getElementById("rf");
   if(rf) rf.onsubmit=e=>{e.preventDefault();const v=document.getElementById("rname").value.trim();if(!v)return;S.name=v.slice(0,20);S.res=RESNO;save();route()};
+  const rn=document.getElementById("rname");
+  if(rn&&S.stage>=3&&S.stage<9){const msg="すず　です　あけて";let i=0;const it=setInterval(()=>{if(!document.body.contains(rn)){clearInterval(it);return}rn.value=msg.slice(0,++i);if(i>=msg.length){clearInterval(it);setTimeout(()=>{if(document.body.contains(rn))rn.value=""},1500)}},260)}
   const uf=document.getElementById("uf");
   if(uf) uf.onsubmit=e=>{e.preventDefault();const v=norm(document.getElementById("ufi").value),m=document.getElementById("umsg");
     if(!S.res){m.textContent="錠前は動かない。……ご予約が、ないからだろうか。";shake(uf);return}
-    if(v==="0245"||v==="245"){setStage(2);route()}else{m.textContent="錠前は、びくともしない。";shake(uf)}};
+    if(v==="0245"){setStage(2);route();return}
+    if(v==="0915"||v==="2115"){m.textContent="……鏡の中の時刻は、本当の時刻ではない。";shake(uf);return}
+    m.textContent="錠前は、びくともしない。";shake(uf)};
+  if(document.getElementById("uroom")){bindDarkRoom("uroom");bindPhoto()}
   const bf=document.getElementById("bf");
-  if(bf) bf.onsubmit=e=>{e.preventDefault();const v=norm(document.getElementById("bfi").value),m=document.getElementById("bmsg");
+  if(bf) bf.onsubmit=e=>{e.preventDefault();audioInit();const v=norm(document.getElementById("bfi").value),m=document.getElementById("bmsg");
     if(v===norm(SECRET)){setStage(3);location.hash="#yado";return}
-    if(v.includes(norm("月の下"))||v.includes("つきのした")||v.includes("ひとつ灯り")){m.textContent="……呼び鈴は鳴らない。書き写したものではなく、写しとったものを。";shake(bf);return}
+    if(v.includes("月の下")||v.includes("つきのした")||v.includes("灯り")){m.textContent="……呼び鈴は鳴らない。書き写したものではなく、写しとったものを。";shake(bf);return}
     m.textContent=v?"呼び鈴は、沈黙している。":"";shake(bf)};
   if(h==="yado"&&S.stage>=3&&S.stage<9) armBack();
   const sg=document.getElementById("sign"); if(sg) sg.onclick=()=>ending(1);
-  if(h==="s61"&&S.stage===3) startIdle();
-  if(h==="s61"&&S.stage>=4&&S.stage<9) startTimer();
+  const hb=document.getElementById("hideBtn"); if(hb) hb.onclick=startHide;
+  if(h==="s61"&&S.stage>=4&&S.stage<7) startTimer();
   const r4=document.getElementById("rooms4");
   if(r4) r4.querySelectorAll("button").forEach(b=>b.onclick=()=>{
     if(b.dataset.r==="睦月"){setStage(5);route();return}
-    T.pen+=LIMIT/15*2.5; b.disabled=true; document.getElementById("rmsg").textContent=`${b.dataset.r}の間の床の間には、何もなかった。……煙が濃くなる。`;});
-  const hand=document.getElementById("hand");let withSuzu=false;
-  if(hand) hand.onclick=()=>{withSuzu=true;hand.disabled=true;hand.textContent="すずの手を握った";document.getElementById("hmsg").textContent="小さな手が、ぎゅっと握り返してくる。"};
-  document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
-    const x=b.dataset.x;
-    if(x!=="oku"){ending(2,x);return}
-    ending(withSuzu?4:3);
-  });
+    T.pen+=LIMIT/15*2.5; b.disabled=true;thud(.8);buzz(200);document.getElementById("rmsg").textContent=`${b.dataset.r}の間の床の間には、何もなかった。……煙が濃くなる。`;});
+  bindDoor();
+  if(document.getElementById("kroom")){
+    bindDarkRoom("kroom");
+    const sb=document.getElementById("suzuBtn"),tk=document.getElementById("suzuTalk");
+    sb.onclick=()=>{if(S.withSuzu){return}tk.innerHTML=`<div class="bubble">仲居見習いの着物を着た、小さな女の子。胸の名札に「すず」。<br>膝を抱えたまま、顔を上げない。<br>「……だれ？　だれも、わたしの名前を呼んでくれない」</div><div class="row"><input id="sname" placeholder="名前を呼ぶ" autocomplete="off"><button id="scall">呼ぶ</button></div>`;
+      document.getElementById("scall").onclick=()=>{const v=norm(document.getElementById("sname").value);
+        if(["つきみすず","月見すず","月見鈴","つきみ鈴"].includes(v)){S.withSuzu=1;save();tk.innerHTML=`<div class="bubble">女の子が、ゆっくり顔を上げた。<br>「……おぼえてて、くれたの？」<br>小さな手が、あなたの手を握る。</div>`;return}
+        if(v==="すず"||v==="鈴"){document.getElementById("kmsg").textContent="「……それは、名札の名前」　女の子は顔を伏せたままだ。";return}
+        document.getElementById("kmsg").textContent=v?"返事はない。煙が濃くなる。":"";T.pen+=v?LIMIT/15:0}};
+    document.getElementById("toBtn").onclick=()=>{if(S.withSuzu){setStage(7);route()}else ending(3)};
+  }
+  document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>ending(2,b.dataset.x));
+  const bw=document.getElementById("blowBtn"); if(bw) bw.onclick=()=>{bw.style.display="none";blow()};
 }
 
 /* ================= エンディング ================= */
@@ -526,33 +693,37 @@ function endLines(id,x){
   return {
    1:[`筆をとり、「${n}」と記す。`,"墨が乾くより先に、帳場の灯りがふっと消えた。","廊下の奥から、仲居の声がする。","「いらっしゃいませ。お部屋は、閏の間でございます」","来年も、再来年も。","あなたは毎年、同じ日に、この宿へ予約を入れる。"],
    2:[x==="watari"?"渡り廊下は、すでに炎に包まれていた。":x==="genkan"?"玄関へ続く廊下は、煙で何も見えなかった。":"柱時計が、午前二時四十五分を打った。","熱い。息ができない。","遠くで、女の子の泣き声がする。","……時計の針は、そこで止まった。","四十年後も、ずっと。"],
-   3:["蔵の奥の板壁が、きしんで開いた。","冷たい沢の空気。あなたは、ひとりで外へ転がり出た。","振り返ると、蔵は炎の中だった。","……あの子は？","気がつくと、令和の月下荘の前に立っていた。","帳場の灯りは、今年も、消えていない。"],
-   4:["蔵の奥の板壁が、きしんで開いた。","すずの手を引いて、冷たい沢へ転がり出る。","背後で、蔵が崩れる音がした。","「……ありがとう」","小さな声。握った手の、ぬくもり。","――気がつくと、夜明けの月下荘の前に立っていた。",`帳場から出てきた年配の女将が、あなたを見て、涙ぐむ。`,`「${n}様。……お待ちしておりました」`]
+   3:["蔵の奥の板壁を押し破り、ひとりで外へ転がり出た。","振り返ると、蔵は炎の中だった。","……あの子は？","気がつくと、令和の月下荘の前に立っていた。","帳場の灯りは、今年も、消えていない。","宿帳には、今年もあなたの名前がある。"],
+   4:["ふっと、灯りが消えた。","夜明けの光が、帳場に差しこむ。","背後で、年配の女将が立ちつくしていた。",`「${n}様。……お待ちしておりました」`,"「あの夜、蔵で泣いていたのは、わたしです」","「四十年かかって、ようやく、お礼が言えます」"],
+   5:["足音が、止まった。","襖が、すうっと開く。","目が、合った。",'<span style="color:#c33;font-size:22px;letter-spacing:.5em">みぃつけた</span>',"……あなたは、あの夜から出られない。"]
   }[id];
 }
 function ending(id,x){
-  cancelAnimationFrame(T.raf);clearInterval(T.idle);
+  cancelAnimationFrame(T.raf);clearInterval(T.hide);clearInterval(T.hb);buzz(0);
+  if(id===5){buzz([300,100,300]);thud(1)}
   if(!S.ends.includes(id)) S.ends.push(id);
-  S.stage=9;S.last=id;save();
-  const lines=[...endLines(id,x),`<span class="en" style="font-size:14px;color:#c9a76a">${id===4?"TRUE END":"END "+id}　―　${END_T[id]}</span>`,`<small style="font-size:12px;color:#8a7660">結末 ${S.ends.length} / 4</small>`];
+  S.stage=9;S.last=id;S.withSuzu=0;save();
+  const lines=[...endLines(id,x),`<span class="en" style="font-size:14px;color:#c9a76a">${id===4?"TRUE END":"END "+id}　―　${END_T[id]}</span>`,`<small style="font-size:12px;color:#8a7660">結末 ${S.ends.length} / 5</small>`];
   const d=document.createElement("div");d.id="end";
   if(id===4) d.style.background="linear-gradient(#0b0f1a,#2a2236 60%,#a8704a)";
   if(id===2) d.style.background="radial-gradient(ellipse at 50% 110%,#5a1a08,#000 70%)";
-  d.innerHTML=lines.map(l=>`<p>${l}</p>`).join("")+`<div><button id="eb1">トップへ戻る</button><button id="eb2">あの夜に、もう一度戻る</button></div>`;
+  if(id===5){d.innerHTML=`<div class="eyes"><span></span><span></span></div>`;d.style.background="#000"}
+  d.innerHTML+=lines.map(l=>`<p>${l}</p>`).join("")+`<div><button id="eb1">トップへ戻る</button><button id="eb2">あの夜に、もう一度戻る</button></div>`;
   document.body.appendChild(d);
   const ps=d.querySelectorAll("p");
-  ps.forEach((p,i)=>setTimeout(()=>p.classList.add("v"),700+i*1400));
-  setTimeout(()=>d.querySelectorAll("button").forEach(b=>b.style.opacity=1),700+ps.length*1400);
+  ps.forEach((p,i)=>setTimeout(()=>p.classList.add("v"),(id===5?1600:700)+i*1400));
+  setTimeout(()=>d.querySelectorAll("button").forEach(b=>b.style.opacity=1),(id===5?1600:700)+ps.length*1400);
   d.querySelector("#eb1").onclick=()=>{d.remove();location.hash="#top";route()};
-  d.querySelector("#eb2").onclick=()=>{d.remove();S.stage=3;S.last=0;save();T={start:0,pen:0,raf:0,idle:0};location.hash="#yado";route()};
+  d.querySelector("#eb2").onclick=()=>{d.remove();S.stage=3;S.last=0;save();T={start:0,pen:0,raf:0,hide:0,hb:0};location.hash="#yado";route()};
 }
 
 /* タブを離れたとき */
 const baseTitle=document.title;
-document.addEventListener("visibilitychange",()=>{document.title=document.hidden&&S.stage>=1&&S.stage<9?"灯りは、消さずにおきます":baseTitle});
+document.addEventListener("visibilitychange",()=>{document.title=document.hidden&&S.stage>=1&&S.stage<9?"灯りは、消さずにおきます":baseTitle;
+  if(!document.hidden&&S.stage>=3&&S.stage<9){const f=document.createElement("div");f.className="hflash";f.innerHTML='<svg viewBox="0 0 100 60"><g fill="#7a0d0d" opacity=".85"><path d="M20 50 q-6-18 0-30 l2 14 l2-20 l3 20 l3-18 l2 20 l3-12 q4 14-3 26z"/><path d="M70 55 q-6-18 0-30 l2 14 l2-20 l3 20 l3-18 l2 20 l3-12 q4 14-3 26z"/></g></svg>';document.body.appendChild(f);buzz(120);setTimeout(()=>f.remove(),450)}});
 
 document.getElementById("reset").onclick=function(){
-  if(this.dataset.c){try{localStorage.removeItem(KEY)}catch(e){}S={stage:0,name:"",res:"",ends:[],last:0};this.dataset.c="";this.textContent="データを初期化";location.hash="#top";route();}
+  if(this.dataset.c){try{localStorage.removeItem(KEY)}catch(e){}S={stage:0,name:"",res:"",ends:[],last:0,visits:0,withSuzu:0};this.dataset.c="";this.textContent="データを初期化";location.hash="#top";route();}
   else{this.dataset.c=1;this.textContent="本当に初期化する？（もう一度押す）"}
 };
 route();
